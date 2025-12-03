@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/colors.dart';
+import '../../../domain/repositories/user_data_repository.dart';
 import '../../providers/history_provider.dart';
 
 class HistoryScreen extends ConsumerWidget {

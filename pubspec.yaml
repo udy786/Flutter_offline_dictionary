@@ -59,16 +59,18 @@ flutter:
     - assets/database/
     - assets/images/
 
-  fonts:
-    - family: NotoSans
-      fonts:
-        - asset: assets/fonts/NotoSans-Regular.ttf
-        - asset: assets/fonts/NotoSans-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/NotoSans-Light.ttf
-          weight: 300
-    - family: NotoSansDevanagari
-      fonts:
-        - asset: assets/fonts/NotoSansDevanagari-Regular.ttf
-        - asset: assets/fonts/NotoSansDevanagari-Bold.ttf
-          weight: 700
+  # Fonts are optional - download from Google Fonts if needed
+  # See assets/fonts/.gitkeep for download instructions
+  # fonts:
+  #   - family: NotoSans
+  #     fonts:
+  #       - asset: assets/fonts/NotoSans-Regular.ttf
+  #       - asset: assets/fonts/NotoSans-Bold.ttf
+  #         weight: 700
+  #       - asset: assets/fonts/NotoSans-Light.ttf
+  #         weight: 300
+  #   - family: NotoSansDevanagari
+  #     fonts:
+  #       - asset: assets/fonts/NotoSansDevanagari-Regular.ttf
+  #       - asset: assets/fonts/NotoSansDevanagari-Bold.ttf
+  #         weight: 700
