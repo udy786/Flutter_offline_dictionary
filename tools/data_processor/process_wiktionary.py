@@ -95,19 +95,20 @@ def process_english_entry(entry: Dict) -> Optional[ProcessedWord]:
     if not definitions:
         return None
 
-    # Get Hindi translations
+    # Get Hindi translations (optional - not all words have them)
     hindi_translations = extract_translations(entry, 'Hindi')
 
-    # Only include if there are Hindi translations
-    if not hindi_translations:
-        return None
+    # Include word even if no Hindi translations (hybrid approach)
+    translations = {}
+    if hindi_translations:
+        translations['hi'] = hindi_translations
 
     return ProcessedWord(
         word=word,
         language='en',
         pos=pos,
         definitions=definitions,
-        translations={'hi': hindi_translations},
+        translations=translations,
         pronunciation_ipa=extract_pronunciation(entry),
         examples=extract_examples(senses),
         etymology=entry.get('etymology_text'),
