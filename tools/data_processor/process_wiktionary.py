@@ -47,12 +47,11 @@ def extract_definitions(senses: List[Dict]) -> List[str]:
 def extract_translations(entry: Dict, target_lang: str) -> List[str]:
     """Extract translations for a specific target language."""
     translations = []
-    for trans_group in entry.get('translations', []):
-        for trans in trans_group.get('translations', []):
-            if trans.get('lang') == target_lang or trans.get('code') == target_lang:
-                word = trans.get('word', '').strip()
-                if word:
-                    translations.append(word)
+    for trans in entry.get('translations', []):
+        if trans.get('lang') == target_lang or trans.get('code') == target_lang:
+            word = trans.get('word', '').strip()
+            if word:
+                translations.append(word)
     return list(set(translations))  # Remove duplicates
 
 
