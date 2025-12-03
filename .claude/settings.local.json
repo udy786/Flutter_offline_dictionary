@@ -4,7 +4,11 @@
       "WebSearch",
       "WebFetch(domain:kaikki.org)",
       "WebFetch(domain:github.com)",
-      "Bash(flutter create:*)"
+      "Bash(flutter create:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

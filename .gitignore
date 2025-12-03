@@ -61,5 +61,5 @@ __pycache__/
 venv/
 ENV/
 
-# Database files (generated, should rebuild)
-assets/database/*.db
+# Database files in data processor (raw output)
+# Note: assets/database/dictionary.db is tracked for easy setup
