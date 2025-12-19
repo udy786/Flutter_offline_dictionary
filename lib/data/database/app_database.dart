@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -109,26 +108,22 @@ LazyDatabase _openConnection() {
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'dictionary.db'));
 
-    // If the database doesn't exist, copy from assets
+    // Database should already exist from Firebase download
+    // If it doesn't exist, something went wrong
     if (!await file.exists()) {
-      await _copyDatabaseFromAssets(file);
+      throw Exception(
+        'Database file not found. Please restart the app to download the database.',
+      );
+    }
+
+    // Verify database is not corrupted (should be at least 100MB)
+    final fileSize = await file.length();
+    if (fileSize < 100000000) {
+      throw Exception(
+        'Database file is corrupted (${fileSize ~/ (1024 * 1024)}MB). Please restart the app to re-download.',
+      );
     }
 
     return NativeDatabase.createInBackground(file);
   });
-}
-
-Future<void> _copyDatabaseFromAssets(File targetFile) async {
-  try {
-    // Try to load the database from assets
-    final data = await rootBundle.load('assets/database/dictionary.db');
-    final bytes = data.buffer.asUint8List();
-    await targetFile.parent.create(recursive: true);
-    await targetFile.writeAsBytes(bytes);
-  } catch (e) {
-    // If no asset database exists, create an empty one
-    // This will be populated later
-    await targetFile.parent.create(recursive: true);
-    await targetFile.create();
-  }
 }

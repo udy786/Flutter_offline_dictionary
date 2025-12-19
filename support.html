@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - WordBridge Offline Dictionary</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            background: #f9f9f9;
+        }
+        .header {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.95;
+            font-size: 18px;
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2196F3;
+            margin-top: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        h3 {
+            color: #1976D2;
+            margin-top: 20px;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 12px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .faq-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+        .faq-question {
+            font-weight: bold;
+            color: #1976D2;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .faq-answer {
+            color: #555;
+            margin: 0;
+        }
+        .contact-box {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+            border: 2px solid #2196F3;
+        }
+        .contact-box h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        .contact-info {
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        .contact-info strong {
+            color: #1976D2;
+        }
+        a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px;
+            margin: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .button {
+            display: inline-block;
+            background: #2196F3;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+        .button:hover {
+            background: #1976D2;
+            text-decoration: none;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .alert {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 WordBridge – Offline Dictionary</h1>
+        <p>Your Complete English-Hindi Dictionary</p>
+    </div>
+
+    <div class="content">
+        <h2>About WordBridge</h2>
+        <p>
+            WordBridge is a comprehensive offline dictionary application featuring over 1.4 million English words and
+            35,000 Hindi words with complete definitions and translations. Access the entire database without any
+            internet connection required.
+        </p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">1.4M+</div>
+                <div class="stat-label">English Words</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">35K+</div>
+                <div class="stat-label">Hindi Words</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Offline Access</div>
+            </div>
+        </div>
+
+        <h2>Key Features</h2>
+        <ul class="feature-list">
+            <li>Over 1.4 million English word definitions from Wiktionary</li>
+            <li>35,000+ Hindi words with Devanagari script support</li>
+            <li>Lightning-fast full-text search functionality</li>
+            <li>Complete offline access - no internet required</li>
+            <li>Save favorite words for quick access</li>
+            <li>Automatic search history tracking</li>
+            <li>Clean, modern, and intuitive interface</li>
+            <li>Support for both English and Hindi search</li>
+            <li>Detailed word definitions and meanings</li>
+            <li>Free to use with optional ads</li>
+        </ul>
+
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">Q: Does WordBridge require an internet connection?</div>
+            <div class="faq-answer">
+                No! WordBridge is designed to work completely offline. The entire dictionary database is stored
+                locally on your device. Internet is only used for displaying advertisements. All search and
+                definition features work without any internet connection.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Q: How do I search for words?</div>
+            <div class="faq-answer">
+                Simply tap the search bar on the home screen and start typing. WordBridge will show matching
+                results as you type. You can search for English words or Hindi words in Devanagari script.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Q: How do I save my favorite words?</div>
+            <div class="faq-answer">
+                When viewing a word definition, tap the heart icon to add it to your favorites. Access all your
+                saved words anytime from the Favorites screen in the top navigation bar.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Q: Can I clear my search history?</div>
+            <div class="faq-answer">
+                Yes! Go to the History screen (accessible from the top navigation bar) and tap the trash icon
+                to clear all search history. You can also swipe individual entries to remove them.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Q: Why is the app download size large?</div>
+            <div class="faq-answer">
+                The app contains a comprehensive offline database with over 1.4 million words and their complete
+                definitions. This ensures you have full access to all dictionary content without needing an
+                internet connection. The size is approximately 500MB.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Q: Is my data private?</div>
+            <div class="faq-answer">
+                Yes! All your search history and favorite words are stored locally on your device only. We do not
+                collect, store, or transmit any of your personal data. The only data collection is through Google
+                AdMob for advertising purposes. See our
+                <a href="privacy_policy.html">Privacy Policy</a> for details.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Q: Where does the dictionary data come from?</div>
+            <div class="faq-answer">
+                All dictionary data is sourced from Wiktionary, a free multilingual dictionary project. The data
+                is used under the Creative Commons CC BY-SA 3.0 license.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Q: Can I use WordBridge without ads?</div>
+            <div class="faq-answer">
+                Currently, WordBridge displays banner advertisements to support development and maintenance.
+                The ads are non-intrusive and appear only at the bottom of certain screens. They require an
+                internet connection to display.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Q: What platforms and versions are supported?</div>
+            <div class="faq-answer">
+                WordBridge supports iOS 12.0 or later and Android 5.0 (Lollipop) or later. The app is optimized
+                for all iPhone, iPad, and Android smartphone/tablet devices running compatible OS versions.
+            </div>
+        </div>
+
+        <h2>Troubleshooting</h2>
+
+        <h3>Search not returning results</h3>
+        <p>
+            If you're searching for a word and not getting results:
+        </p>
+        <ul>
+            <li>Try searching for a more common word to verify the database is working</li>
+            <li>Check your spelling - the search is case-insensitive but spelling-sensitive</li>
+            <li>Try searching for just part of the word</li>
+            <li>Ensure you're using the correct language (English or Hindi)</li>
+        </ul>
+
+        <h3>App is slow or not responding</h3>
+        <p>
+            If the app feels slow:
+        </p>
+        <ul>
+            <li>The first launch may take a few seconds to load the database</li>
+            <li>Try closing and reopening the app</li>
+            <li>Ensure your device has sufficient free storage (at least 1GB recommended)</li>
+            <li>Restart your device if issues persist</li>
+        </ul>
+
+        <h3>Ads not displaying</h3>
+        <p>
+            Advertisements require an internet connection. If ads aren't showing:
+        </p>
+        <ul>
+            <li>Verify you have an active internet connection</li>
+            <li>Check that you haven't disabled ad tracking in your device Settings (Privacy settings on iOS/Android)</li>
+            <li>Note: Ads may not always be available based on your location</li>
+        </ul>
+
+        <div class="alert">
+            <strong>Note:</strong> All core dictionary features (search, definitions, favorites, history) work
+            completely offline. Only advertisements require internet connectivity.
+        </div>
+
+        <h2>Privacy & Data</h2>
+        <p>
+            We take your privacy seriously. WordBridge stores all your data locally on your device:
+        </p>
+        <ul>
+            <li><strong>Search History:</strong> Stored locally, never uploaded</li>
+            <li><strong>Favorite Words:</strong> Stored locally, never uploaded</li>
+            <li><strong>App Preferences:</strong> Stored locally, never uploaded</li>
+        </ul>
+        <p>
+            The only data collection is through Google AdMob for advertising purposes. For complete details,
+            please read our <a href="privacy_policy.html">Privacy Policy</a>.
+        </p>
+
+        <h2>System Requirements</h2>
+        <ul>
+            <li><strong>Platform:</strong> iOS 12.0 or later / Android 5.0 (Lollipop) or later</li>
+            <li><strong>Storage:</strong> Approximately 500MB free space</li>
+            <li><strong>Device:</strong> Compatible with iPhone, iPad, and Android smartphones/tablets</li>
+            <li><strong>Internet:</strong> Optional (only for ads)</li>
+        </ul>
+
+        <h2>Links & Resources</h2>
+        <p>
+            <a href="privacy_policy.html" class="button">Privacy Policy</a>
+            <a href="mailto:info@incredereservices.com" class="button">Contact Support</a>
+        </p>
+
+        <div class="contact-box">
+            <h3>📧 Contact Support</h3>
+            <div class="contact-info">
+                <p>Need help? Have feedback? We'd love to hear from you!</p>
+                <p>
+                    <strong>Email:</strong> <a href="mailto:info@incredereservices.com">info@incredereservices.com</a><br>
+                    <strong>App Name:</strong> WordBridge – Offline Dictionary<br>
+                    <strong>Developer:</strong> Incredere Services Pvt Ltd<br>
+                    <strong>Version:</strong> 1.0.0
+                </p>
+                <p style="margin-top: 15px;">
+                    When contacting support, please include:
+                </p>
+                <ul>
+                    <li>Your device platform (iOS or Android)</li>
+                    <li>Operating system version (iOS version or Android version)</li>
+                    <li>Device model (iPhone/iPad or Android device name)</li>
+                    <li>Description of the issue</li>
+                    <li>Screenshots if applicable</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>Acknowledgments</h2>
+        <p>
+            WordBridge uses dictionary data from <a href="https://www.wiktionary.org/" target="_blank">Wiktionary</a>,
+            a free multilingual dictionary. The data is licensed under the
+            <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank">Creative Commons Attribution-ShareAlike 3.0 License</a>.
+        </p>
+        <p>
+            Advertisements are provided by <a href="https://admob.google.com/" target="_blank">Google AdMob</a>.
+        </p>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 WordBridge – Offline Dictionary by Incredere Services Pvt Ltd. All rights reserved.</p>
+        <p>
+            <a href="privacy_policy.html">Privacy Policy</a> |
+            <a href="mailto:info@incredereservices.com">Contact Us</a>
+        </p>
+    </div>
+</body>
+</html>

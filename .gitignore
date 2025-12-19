@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -63,3 +65,5 @@ ENV/
 
 # Database files in data processor (raw output)
 # Note: assets/database/dictionary.db is tracked for easy setup
+# Exclude the large 460MB database file from root assets folder
+assets/dictionary.db

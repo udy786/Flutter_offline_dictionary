@@ -5,6 +5,7 @@ class SearchBarWidget extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final bool readOnly;
   final bool autofocus;
   final String? hintText;
@@ -16,6 +17,7 @@ class SearchBarWidget extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.controller,
+    this.focusNode,
     this.readOnly = false,
     this.autofocus = false,
     this.hintText,
@@ -24,22 +26,61 @@ class SearchBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: readOnly ? onTap : null,
-      child: TextField(
-        controller: controller,
-        readOnly: readOnly,
-        autofocus: autofocus,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
-        textInputAction: TextInputAction.search,
-        decoration: InputDecoration(
-          hintText: hintText ?? 'Search...',
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: trailing ??
-              (controller != null && !readOnly
-                  ? _ClearButton(controller: controller!)
-                  : null),
+    if (readOnly) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Theme.of(context).primaryColor.withOpacity(0.2),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.search,
+                color: Theme.of(context).primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  hintText ?? 'Search...',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey[400],
+                      ),
+                ),
+              ),
+              if (trailing != null) trailing!,
+            ],
+          ),
+        ),
+      );
+    }
+
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      autofocus: autofocus,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      textInputAction: TextInputAction.search,
+      style: Theme.of(context).textTheme.bodyLarge,
+      decoration: InputDecoration(
+        hintText: hintText ?? 'Search...',
+        prefixIcon: const Icon(Icons.search, size: 24),
+        suffixIcon: trailing ??
+            (controller != null
+                ? _ClearButton(controller: controller!)
+                : null),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 18,
         ),
       ),
     );

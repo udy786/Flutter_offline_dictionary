@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../providers/favorites_provider.dart';
+import '../../widgets/banner_ad_widget.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
@@ -25,6 +26,9 @@ class FavoritesScreen extends ConsumerWidget {
         ],
       ),
       body: _buildBody(context, ref, favoritesState),
+      bottomNavigationBar: const SafeArea(
+        child: BannerAdWidget(),
+      ),
     );
   }
 

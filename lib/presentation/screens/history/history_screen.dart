@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme/colors.dart';
 import '../../../domain/repositories/user_data_repository.dart';
 import '../../providers/history_provider.dart';
+import '../../widgets/banner_ad_widget.dart';
 
 class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
@@ -26,6 +27,9 @@ class HistoryScreen extends ConsumerWidget {
         ],
       ),
       body: _buildBody(context, ref, historyState),
+      bottomNavigationBar: const SafeArea(
+        child: BannerAdWidget(),
+      ),
     );
   }
 

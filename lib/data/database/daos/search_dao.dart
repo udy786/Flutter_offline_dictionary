@@ -192,34 +192,42 @@ class SearchDao extends DatabaseAccessor<AppDatabase> with _$SearchDaoMixin {
       }
     }
 
-    // 3. Full-text search
+    // 3. Full-text search (skip if fails - FTS might not be set up)
     if (results.length < limit) {
-      final ftsResults = await searchFullText(
-        query,
-        sourceLanguage: sourceLanguage,
-        limit: limit - results.length,
-      );
-      for (final r in ftsResults) {
-        if (!seenIds.contains(r.wordId)) {
-          results.add(r);
-          seenIds.add(r.wordId);
+      try {
+        final ftsResults = await searchFullText(
+          query,
+          sourceLanguage: sourceLanguage,
+          limit: limit - results.length,
+        );
+        for (final r in ftsResults) {
+          if (!seenIds.contains(r.wordId)) {
+            results.add(r);
+            seenIds.add(r.wordId);
+          }
         }
+      } catch (_) {
+        // FTS search failed, continue without it
       }
     }
 
     // 4. Search in translations (if target language specified)
     if (results.length < limit && sourceLanguage != null && targetLanguage != null) {
-      final transResults = await searchInTranslations(
-        query,
-        sourceLanguage: sourceLanguage,
-        targetLanguage: targetLanguage,
-        limit: limit - results.length,
-      );
-      for (final r in transResults) {
-        if (!seenIds.contains(r.wordId)) {
-          results.add(r);
-          seenIds.add(r.wordId);
+      try {
+        final transResults = await searchInTranslations(
+          query,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
+          limit: limit - results.length,
+        );
+        for (final r in transResults) {
+          if (!seenIds.contains(r.wordId)) {
+            results.add(r);
+            seenIds.add(r.wordId);
+          }
         }
+      } catch (_) {
+        // Translation search failed, continue without it
       }
     }
 

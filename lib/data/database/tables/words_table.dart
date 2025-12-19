@@ -8,7 +8,7 @@ class Words extends Table {
   TextColumn get pos => text().nullable()(); // Part of speech
   TextColumn get pronunciationIpa => text().nullable()();
   TextColumn get etymology => text().nullable()();
-  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get createdAt => text().nullable()(); // Store as text since DB has text timestamps
 
   @override
   List<Set<Column>> get uniqueKeys => [

@@ -139,7 +139,9 @@ class UserDataRepositoryImpl implements UserDataRepository {
       definitions: data.definitions.map((d) => d.definition).toList(),
       translations: translationsMap,
       examples: data.examples.map((e) => e.exampleText).toList(),
-      createdAt: data.word.createdAt,
+      createdAt: data.word.createdAt != null
+          ? DateTime.tryParse(data.word.createdAt!)
+          : null,
     );
   }
 }

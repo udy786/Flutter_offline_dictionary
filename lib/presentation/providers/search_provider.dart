@@ -88,9 +88,9 @@ class SearchNotifier extends StateNotifier<SearchState> {
       if (state.query == query) {
         state = state.copyWith(results: results, isLoading: false, error: null);
       }
-    } catch (e) {
+    } catch (e, stack) {
       if (state.query == query) {
-        state = state.copyWith(isLoading: false, error: e.toString());
+        state = state.copyWith(isLoading: false, error: '$e\n$stack');
       }
     }
   }
