@@ -3,7 +3,6 @@
 A cross-platform Flutter mobile application for offline English-Hindi and Hindi-English dictionary using Wiktionary data.
 
 ## Features
-
 - **Offline-first**: Works completely without internet
 - **Bilingual**: English to Hindi and Hindi to English translations
 - **Full-text search**: Fast search with FTS5 support
