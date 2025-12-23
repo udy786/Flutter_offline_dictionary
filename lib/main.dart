@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 import 'app/app.dart';
 import 'core/services/ad_service.dart';
@@ -10,9 +9,6 @@ import 'presentation/screens/database_download/database_download_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase
-  await Firebase.initializeApp();
 
   // Initialize AdMob
   await AdService().initialize();

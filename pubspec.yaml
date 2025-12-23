@@ -1,7 +1,7 @@
 name: offline_dictionary
 description: Offline English-Hindi Dictionary using Wiktionary data
 publish_to: 'none'
-version: 1.0.0+3
+version: 1.0.1+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -32,6 +32,7 @@ dependencies:
   shared_preferences: ^2.2.2
   connectivity_plus: ^5.0.2
   collection: ^1.18.0
+  http: ^1.1.0
 
   # UI
   flutter_native_splash: ^2.3.6
@@ -40,9 +41,6 @@ dependencies:
   # Ads
   google_mobile_ads: ^5.1.0
 
-  # Firebase
-  firebase_core: ^3.6.0
-  firebase_storage: ^12.3.4
 
 dev_dependencies:
   flutter_test:
@@ -63,7 +61,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    # Database is downloaded from Firebase Storage on first launch
+    # Database is downloaded from GitHub Releases on first launch
     # - assets/dictionary.db (removed to reduce app size)
     - assets/database/
     - assets/images/

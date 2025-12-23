@@ -1,17 +1,17 @@
 import 'dart:io';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 class DatabaseDownloadService {
   static final DatabaseDownloadService _instance = DatabaseDownloadService._internal();
   factory DatabaseDownloadService() => _instance;
   DatabaseDownloadService._internal();
 
-  // Firebase Storage path to your database file
+  // GitHub Release download URL for your database file
   static const String _databaseFileName = 'dictionary.db';
-  static const String _firebaseStoragePath = 'database/dictionary.db';
+  static const String _githubDownloadUrl = 'https://github.com/DarshanIncredere/dictionary-database-files/releases/download/v1.0.0/dictionary.db';
 
   /// Get the local path where the database should be stored
   Future<String> getDatabasePath() async {
@@ -39,7 +39,7 @@ class DatabaseDownloadService {
     return true;
   }
 
-  /// Download database from Firebase Storage with progress tracking
+  /// Download database from GitHub with progress tracking
   /// Returns a stream of download progress (0.0 to 1.0)
   Stream<double> downloadDatabase() async* {
     try {
@@ -54,66 +54,67 @@ class DatabaseDownloadService {
       // Ensure parent directory exists
       await file.parent.create(recursive: true);
 
-      debugPrint('DatabaseDownloadService: Starting download from Firebase Storage');
-      debugPrint('DatabaseDownloadService: Storage path: $_firebaseStoragePath');
+      debugPrint('DatabaseDownloadService: Starting download from GitHub');
+      debugPrint('DatabaseDownloadService: URL: $_githubDownloadUrl');
       debugPrint('DatabaseDownloadService: Local path: $path');
 
-      // Get reference to Firebase Storage file
-      final ref = FirebaseStorage.instance.ref().child(_firebaseStoragePath);
+      // Make HTTP request with streaming
+      final request = http.Request('GET', Uri.parse(_githubDownloadUrl));
+      final response = await request.send();
 
-      // Get metadata to know total file size
-      final metadata = await ref.getMetadata();
-      final totalBytes = metadata.size ?? 0;
+      if (response.statusCode != 200) {
+        throw Exception('Failed to download file. Status code: ${response.statusCode}');
+      }
+
+      // Get total file size from Content-Length header
+      final totalBytes = response.contentLength ?? 0;
 
       if (totalBytes == 0) {
-        debugPrint('DatabaseDownloadService: Warning - Could not determine file size from metadata');
+        debugPrint('DatabaseDownloadService: Warning - Could not determine file size from headers');
       } else {
         debugPrint('DatabaseDownloadService: File size: ${totalBytes ~/ (1024 * 1024)}MB');
       }
 
       // Download with progress tracking
-      final downloadTask = ref.writeToFile(file);
+      int bytesReceived = 0;
+      final sink = file.openWrite();
 
-      // Listen to progress
-      await for (final snapshot in downloadTask.snapshotEvents) {
-        if (snapshot.state == TaskState.running) {
-          // Handle case where totalBytes might be 0 to avoid NaN
-          final progress = snapshot.totalBytes > 0
-              ? snapshot.bytesTransferred / snapshot.totalBytes
-              : 0.0;
+      try {
+        await for (final chunk in response.stream) {
+          sink.add(chunk);
+          bytesReceived += chunk.length;
 
-          // Only yield valid progress values
-          if (!progress.isNaN && !progress.isInfinite) {
-            debugPrint('DatabaseDownloadService: Downloaded ${snapshot.bytesTransferred ~/ (1024 * 1024)}MB / ${snapshot.totalBytes ~/ (1024 * 1024)}MB (${(progress * 100).toStringAsFixed(1)}%)');
+          // Calculate and yield progress
+          if (totalBytes > 0) {
+            final progress = bytesReceived / totalBytes;
+            debugPrint('DatabaseDownloadService: Downloaded ${bytesReceived ~/ (1024 * 1024)}MB / ${totalBytes ~/ (1024 * 1024)}MB (${(progress * 100).toStringAsFixed(1)}%)');
             yield progress;
-          }
-        } else if (snapshot.state == TaskState.success) {
-          debugPrint('DatabaseDownloadService: Download completed successfully');
-
-          // Verify downloaded file
-          if (await file.exists()) {
-            final fileSize = await file.length();
-            debugPrint('DatabaseDownloadService: Database saved to $path (${fileSize ~/ (1024 * 1024)}MB)');
-
-            if (fileSize < 100 * 1024 * 1024) {
-              throw Exception('Downloaded file is too small (${fileSize ~/ (1024 * 1024)}MB). Download may be corrupted.');
-            }
           } else {
-            throw Exception('File does not exist after download');
+            // If we don't know total size, yield progress based on received bytes
+            debugPrint('DatabaseDownloadService: Downloaded ${bytesReceived ~/ (1024 * 1024)}MB');
+            yield 0.5; // Show some progress
           }
-
-          // Yield 1.0 and return to end the stream
-          yield 1.0;
-          return;
-        } else if (snapshot.state == TaskState.error) {
-          throw Exception('Download failed: ${snapshot.state}');
-        } else if (snapshot.state == TaskState.canceled) {
-          throw Exception('Download canceled');
-        } else if (snapshot.state == TaskState.paused) {
-          debugPrint('DatabaseDownloadService: Download paused');
         }
+      } finally {
+        await sink.close();
       }
 
+      debugPrint('DatabaseDownloadService: Download completed successfully');
+
+      // Verify downloaded file
+      if (await file.exists()) {
+        final fileSize = await file.length();
+        debugPrint('DatabaseDownloadService: Database saved to $path (${fileSize ~/ (1024 * 1024)}MB)');
+
+        if (fileSize < 100 * 1024 * 1024) {
+          throw Exception('Downloaded file is too small (${fileSize ~/ (1024 * 1024)}MB). Download may be corrupted.');
+        }
+      } else {
+        throw Exception('File does not exist after download');
+      }
+
+      // Yield 1.0 and return to end the stream
+      yield 1.0;
     } catch (e) {
       debugPrint('DatabaseDownloadService: Error downloading database: $e');
       rethrow;
