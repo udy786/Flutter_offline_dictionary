@@ -91,7 +91,10 @@ final historyProvider = StateNotifierProvider<HistoryNotifier, HistoryState>((re
 });
 
 /// Provider for recent searches (simplified list)
+/// Watches historyProvider so it refreshes when history changes
 final recentSearchesProvider = FutureProvider<List<WordEntry>>((ref) async {
+  // Watch history state so this rebuilds when history is added/removed/cleared
+  ref.watch(historyProvider);
   final repository = ref.watch(userDataRepositoryProvider);
   return repository.getRecentSearches(limit: 10);
 });

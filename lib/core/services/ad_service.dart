@@ -9,28 +9,33 @@ class AdService {
   AdService._internal();
 
   bool _isInitialized = false;
+  static const bool _useTestAds = true; // TODO: Change to false for production
 
   /// iOS Banner Ad Unit ID
   static const String _iosBannerAdUnitId = 'ca-app-pub-6174288335500940/9670395824';
+
+  /// Android Banner Ad Unit ID
+  static const String _androidBannerAdUnitId = 'ca-app-pub-6174288335500940/6375250003';
 
   /// Test Banner Ad Unit ID (for development)
   static const String _testBannerAdUnitId = 'ca-app-pub-3940256099942544/2934735716';
 
   /// Get the appropriate banner ad unit ID
   String get bannerAdUnitId {
-    if (kDebugMode) {
-      // Use test ads in debug mode
+    if (_useTestAds) {
       return _testBannerAdUnitId;
     }
     if (Platform.isIOS) {
       return _iosBannerAdUnitId;
     }
-    // Return test ad for other platforms (Android not configured yet)
+    if (Platform.isAndroid) {
+      return _androidBannerAdUnitId;
+    }
     return _testBannerAdUnitId;
   }
 
-  /// Check if ads should be shown (iOS only for now)
-  bool get shouldShowAds => Platform.isIOS;
+  /// Check if ads should be shown
+  bool get shouldShowAds => Platform.isIOS || Platform.isAndroid;
 
   /// Initialize the Mobile Ads SDK
   Future<void> initialize() async {

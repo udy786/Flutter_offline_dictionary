@@ -86,9 +86,9 @@ class HistoryScreen extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: const SafeArea(
-        child: BannerAdWidget(),
-      ),
+      // bottomNavigationBar: const SafeArea(
+      //   child: BannerAdWidget(),
+      // ),
     );
   }
 
