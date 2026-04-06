@@ -6,10 +6,12 @@ import '../../../core/services/database_download_service.dart';
 
 class DatabaseDownloadScreen extends StatefulWidget {
   final VoidCallback onDownloadComplete;
+  final VoidCallback? onDownloadStarted;
 
   const DatabaseDownloadScreen({
     super.key,
     required this.onDownloadComplete,
+    this.onDownloadStarted,
   });
 
   @override
@@ -48,6 +50,13 @@ class _DatabaseDownloadScreenState extends State<DatabaseDownloadScreen> {
   }
 
   Future<void> _startDownload() async {
+    // If onDownloadStarted is provided, start background download and navigate to home
+    if (widget.onDownloadStarted != null) {
+      widget.onDownloadStarted!();
+      return;
+    }
+
+    // Fallback: handle download in this screen (original behavior)
     setState(() {
       _isDownloading = true;
       _errorMessage = null;

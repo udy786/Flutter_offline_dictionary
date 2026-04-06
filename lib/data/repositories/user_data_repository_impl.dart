@@ -136,9 +136,9 @@ class UserDataRepositoryImpl implements UserDataRepository {
       pos: data.word.pos,
       pronunciationIpa: data.word.pronunciationIpa,
       etymology: data.word.etymology,
-      definitions: data.definitions.map((d) => d.definition).toList(),
+      definitions: data.definitions.map((d) => d.definition).cast<String>().toList(),
       translations: translationsMap,
-      examples: data.examples.map((e) => e.exampleText).toList(),
+      examples: data.examples.map((e) => e.exampleText).cast<String>().toList(),
       createdAt: data.word.createdAt != null
           ? DateTime.tryParse(data.word.createdAt!)
           : null,
