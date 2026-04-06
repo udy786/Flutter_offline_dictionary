@@ -1,3 +1,4 @@
+import '../../core/services/profanity_filter.dart';
 import '../../domain/entities/word_entry.dart';
 import '../../domain/entities/search_result.dart';
 import '../../domain/repositories/dictionary_repository.dart';
@@ -13,6 +14,7 @@ class DictionaryRepositoryImpl implements DictionaryRepository {
 
   WordDao get _wordDao => _database.wordDao;
   SearchDao get _searchDao => _database.searchDao;
+  final _filter = ProfanityFilter.instance;
 
   @override
   Future<WordEntry?> getWordById(int id) async {
@@ -47,7 +49,10 @@ class DictionaryRepositoryImpl implements DictionaryRepository {
       limit: limit,
     );
 
-    return results.map(_mapToSearchResult).toList();
+    return results
+        .map(_mapToSearchResult)
+        .where((r) => !_filter.isOffensive(r.word))
+        .toList();
   }
 
   @override
@@ -56,11 +61,12 @@ class DictionaryRepositoryImpl implements DictionaryRepository {
     String? sourceLanguage,
     int limit = 10,
   }) async {
-    return _searchDao.getSuggestions(
+    final suggestions = await _searchDao.getSuggestions(
       query,
       sourceLanguage: sourceLanguage,
       limit: limit,
     );
+    return suggestions.where((s) => !_filter.isOffensive(s)).toList();
   }
 
   @override

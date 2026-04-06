@@ -15,12 +15,13 @@ class SearchResultsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return ListView.separated(
       itemCount: results.length,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final result = results[index];
-        return _SearchResultItem(
+        return _SearchResultCard(
           result: result,
           onTap: () => onResultTap(result),
         );
@@ -29,11 +30,11 @@ class SearchResultsList extends StatelessWidget {
   }
 }
 
-class _SearchResultItem extends StatelessWidget {
+class _SearchResultCard extends StatelessWidget {
   final SearchResultEntity result;
   final VoidCallback onTap;
 
-  const _SearchResultItem({
+  const _SearchResultCard({
     required this.result,
     required this.onTap,
   });
@@ -41,83 +42,131 @@ class _SearchResultItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isHindi = result.languageCode == 'hi';
-    final badgeColor = isHindi ? AppColors.hindiBadge : AppColors.englishBadge;
+    final color =
+        isHindi ? const Color(0xFFFF9800) : const Color(0xFF2196F3);
+    final theme = Theme.of(context);
 
-    return ListTile(
+    return GestureDetector(
       onTap: onTap,
-      leading: _LanguageBadge(
-        languageCode: result.languageCode,
-        color: badgeColor,
-      ),
-      title: Text(
-        result.word,
-        style: TextStyle(
-          fontFamily: isHindi ? 'NotoSansDevanagari' : null,
-          fontWeight: FontWeight.w500,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: context.cardBg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: context.dividerC),
+          boxShadow: [
+            BoxShadow(
+              color: context.subtleShadow,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Language indicator
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                result.languageCode.toUpperCase(),
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Word and details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          result.word,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: context.textPrimaryC,
+                            fontFamily: isHindi ? 'NotoSansDevanagari' : null,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (result.isExactMatch) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4CAF50).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'EXACT',
+                            style: TextStyle(
+                              color: Color(0xFF4CAF50),
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (_hasSubtitle) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _subtitleText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            // Arrow
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.grey.shade300,
+              size: 22,
+            ),
+          ],
         ),
       ),
-      subtitle: _buildSubtitle(context),
-      trailing: const Icon(Icons.chevron_right),
     );
   }
 
-  Widget? _buildSubtitle(BuildContext context) {
+  bool get _hasSubtitle {
+    return result.pos != null ||
+        result.matchedTranslation != null ||
+        result.previewDefinition != null;
+  }
+
+  String get _subtitleText {
     final parts = <String>[];
-
-    if (result.pos != null) {
-      parts.add(result.pos!);
-    }
-
+    if (result.pos != null) parts.add(result.pos!);
     if (result.matchedTranslation != null) {
       parts.add('→ ${result.matchedTranslation}');
     }
-
     if (result.previewDefinition != null) {
       parts.add(result.previewDefinition!);
     }
-
-    if (parts.isEmpty) {
-      return null;
-    }
-
-    return Text(
-      parts.join(' • '),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSecondary,
-          ),
-    );
-  }
-}
-
-class _LanguageBadge extends StatelessWidget {
-  final String languageCode;
-  final Color color;
-
-  const _LanguageBadge({
-    required this.languageCode,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        languageCode.toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
+    return parts.join(' • ');
   }
 }

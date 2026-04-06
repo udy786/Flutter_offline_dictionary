@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/colors.dart';
-import '../../../../app/theme/typography.dart';
 
 class ExamplesSection extends StatelessWidget {
   final List<String> examples;
@@ -13,65 +12,76 @@ class ExamplesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Examples',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: examples.asMap().entries.map((entry) {
-                final index = entry.key;
-                final example = entry.value;
-                return _ExampleItem(
-                  example: example,
-                  isLast: index == examples.length - 1,
-                );
-              }).toList(),
-            ),
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: context.subtleShadow,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ExampleItem extends StatelessWidget {
-  final String example;
-  final bool isLast;
-
-  const _ExampleItem({
-    required this.example,
-    required this.isLast,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-      child: Row(
+        ],
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.format_quote,
-            size: 20,
-            color: AppColors.textHint,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.format_quote_rounded,
+                    size: 18, color: Color(0xFF4CAF50)),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Examples',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              example,
-              style: AppTypography.exampleText,
-            ),
-          ),
+          const SizedBox(height: 14),
+          ...examples.asMap().entries.map((entry) {
+            final index = entry.key;
+            final example = entry.value;
+            return Padding(
+              padding: EdgeInsets.only(
+                  bottom: index == examples.length - 1 ? 0 : 12),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: context.screenBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border(
+                    left: BorderSide(
+                      color: const Color(0xFF4CAF50).withOpacity(0.4),
+                      width: 3,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  example,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: context.textSecondaryC,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );

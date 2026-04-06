@@ -48,6 +48,14 @@ class AppColors {
   static const Color warning = Color(0xFFFBBC05);
   static const Color info = Color(0xFF4285F4);
 
+  // Dark mode colors
+  static const Color darkBackground = Color(0xFF141420);
+  static const Color darkSurface = Color(0xFF1E1E2C);
+  static const Color darkCard = Color(0xFF252536);
+  static const Color darkTextPrimary = Color(0xFFE8E8ED);
+  static const Color darkTextSecondary = Color(0xFF9E9EB0);
+  static const Color darkDivider = Color(0xFF2E2E42);
+
   static Color getPosColor(String pos) {
     switch (pos.toLowerCase()) {
       case 'noun':
@@ -72,4 +80,24 @@ class AppColors {
         return textSecondary;
     }
   }
+}
+
+/// Extension for theme-aware colors across all screens
+extension ThemeColors on BuildContext {
+  bool get _isDark => Theme.of(this).brightness == Brightness.dark;
+
+  Color get screenBg =>
+      _isDark ? AppColors.darkBackground : const Color(0xFFF5F7FA);
+  Color get cardBg => _isDark ? AppColors.darkCard : Colors.white;
+  Color get headerBg => _isDark ? AppColors.darkSurface : Colors.white;
+  Color get textPrimaryC =>
+      _isDark ? AppColors.darkTextPrimary : const Color(0xFF2D3142);
+  Color get textSecondaryC =>
+      _isDark ? AppColors.darkTextSecondary : const Color(0xFF9E9E9E);
+  Color get dividerC =>
+      _isDark ? AppColors.darkDivider : Colors.grey.shade100;
+  Color get searchFieldBg =>
+      _isDark ? AppColors.darkSurface : const Color(0xFFF5F7FA);
+  Color get subtleShadow =>
+      _isDark ? Colors.transparent : Colors.black.withOpacity(0.04);
 }

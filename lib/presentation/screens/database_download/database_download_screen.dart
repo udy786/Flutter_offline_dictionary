@@ -35,12 +35,10 @@ class _DatabaseDownloadScreenState extends State<DatabaseDownloadScreen> {
       final connectivityResult = await Connectivity().checkConnectivity();
       if (mounted) {
         setState(() {
-          // connectivity_plus 5.0.2 returns single ConnectivityResult
           _isOnWifi = connectivityResult == ConnectivityResult.wifi;
         });
       }
     } catch (e) {
-      // Default to false if we can't determine connectivity
       if (mounted) {
         setState(() {
           _isOnWifi = false;
@@ -50,13 +48,11 @@ class _DatabaseDownloadScreenState extends State<DatabaseDownloadScreen> {
   }
 
   Future<void> _startDownload() async {
-    // If onDownloadStarted is provided, start background download and navigate to home
     if (widget.onDownloadStarted != null) {
       widget.onDownloadStarted!();
       return;
     }
 
-    // Fallback: handle download in this screen (original behavior)
     setState(() {
       _isDownloading = true;
       _errorMessage = null;
@@ -69,7 +65,6 @@ class _DatabaseDownloadScreenState extends State<DatabaseDownloadScreen> {
       await for (final progress in downloadService.downloadDatabase()) {
         if (mounted) {
           setState(() {
-            // Ensure progress is always a valid value between 0.0 and 1.0
             _progress = progress.isNaN || progress.isInfinite
                 ? 0.0
                 : progress.clamp(0.0, 1.0);
@@ -77,7 +72,6 @@ class _DatabaseDownloadScreenState extends State<DatabaseDownloadScreen> {
         }
       }
 
-      // Download complete - small delay to show 100% before transitioning
       if (mounted) {
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
@@ -99,273 +93,363 @@ class _DatabaseDownloadScreenState extends State<DatabaseDownloadScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF2196F3),
-              Color(0xFF1976D2),
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight - 48, // Account for padding
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 40),
-                // App Icon
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.menu_book,
-                    size: 80,
-                    color: Colors.white,
-                  ),
+      backgroundColor: context.screenBg,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 48,
                 ),
-                const SizedBox(height: 32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 40),
 
-                // Title
-                Text(
-                  'WordBridge Dictionary',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-
-                // Description
-                Text(
-                  _isDownloading
-                      ? 'Downloading dictionary database...'
-                      : 'First-time setup required',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-
-                // Download info card
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.cloud_download,
-                        size: 48,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Download Required',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'The dictionary database (460 MB) needs to be downloaded for offline use.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Connection status
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _isOnWifi
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: _isOnWifi ? Colors.green : Colors.orange,
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _isOnWifi ? Icons.wifi : Icons.signal_cellular_alt,
-                              size: 20,
-                              color: _isOnWifi ? Colors.green : Colors.orange,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              _isOnWifi
-                                  ? 'Connected to WiFi'
-                                  : 'Using cellular data',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: _isOnWifi ? Colors.green : Colors.orange,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                    // App icon
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF2196F3),
+                            Color(0xFF1565C0),
                           ],
                         ),
-                      ),
-
-                      if (!_isOnWifi) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          'Large download - WiFi recommended',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.orange,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Progress indicator (shown when downloading)
-                if (_isDownloading) ...[
-                  Column(
-                    children: [
-                      LinearProgressIndicator(
-                        value: _progress,
-                        backgroundColor: Colors.white.withOpacity(0.3),
-                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                        minHeight: 8,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '${(_progress * 100).toStringAsFixed(1)}% • ${(_progress * 460).toStringAsFixed(0)} MB / 460 MB',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Please keep the app open...',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-
-                // Error message
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.error),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.error_outline, color: AppColors.error),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Download Failed',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  color: AppColors.error,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _errorMessage!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.error,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 32),
-
-                // Download button
-                if (!_isDownloading)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _startDownload,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.download),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Download Database (460 MB)',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2196F3).withOpacity(0.3),
+                            blurRadius: 24,
+                            offset: const Offset(0, 12),
                           ),
                         ],
                       ),
+                      child: const Icon(
+                        Icons.menu_book_rounded,
+                        size: 56,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 28),
 
-                const SizedBox(height: 16),
-
-                // Info text
-                if (!_isDownloading)
-                  Text(
-                    '• Download once, use offline forever\n• 1.4M+ English words + 35K+ Hindi words\n• No internet needed after download',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(0.8),
+                    // Title
+                    Text(
+                      'WordBridge',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: context.textPrimaryC,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                      const SizedBox(height: 40),
+                    const SizedBox(height: 8),
+                    Text(
+                      'English - Hindi Dictionary',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: Colors.grey.shade500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 40),
+
+                    // Download card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: context.cardBg,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: context.subtleShadow,
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Download icon
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2196F3).withOpacity(0.08),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.cloud_download_rounded,
+                              size: 32,
+                              color: Color(0xFF2196F3),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          Text(
+                            'Download Required',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: context.textPrimaryC,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'The dictionary database (460 MB) needs to be downloaded for offline use.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey.shade500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Connection status
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: _isOnWifi
+                                  ? const Color(0xFF4CAF50).withOpacity(0.08)
+                                  : const Color(0xFFFF9800).withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _isOnWifi
+                                      ? Icons.wifi_rounded
+                                      : Icons.signal_cellular_alt_rounded,
+                                  size: 18,
+                                  color: _isOnWifi
+                                      ? const Color(0xFF4CAF50)
+                                      : const Color(0xFFFF9800),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _isOnWifi
+                                      ? 'Connected to WiFi'
+                                      : 'Using cellular data',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: _isOnWifi
+                                        ? const Color(0xFF4CAF50)
+                                        : const Color(0xFFFF9800),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          if (!_isOnWifi) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              'Large download — WiFi recommended',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: const Color(0xFFFF9800),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Progress (when downloading)
+                    if (_isDownloading) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: context.cardBg,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: context.subtleShadow,
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: LinearProgressIndicator(
+                                value: _progress,
+                                backgroundColor:
+                                    const Color(0xFF2196F3).withOpacity(0.1),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF2196F3)),
+                                minHeight: 8,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${(_progress * 100).toStringAsFixed(1)}%',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: const Color(0xFF2196F3),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  '${(_progress * 460).toStringAsFixed(0)} MB / 460 MB',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Please keep the app open...',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
-                  ),
+
+                    // Error message
+                    if (_errorMessage != null) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(14),
+                          border:
+                              Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.error_outline_rounded,
+                                    color: Colors.red.shade400, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Download Failed',
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    color: Colors.red.shade400,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _errorMessage!,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.red.shade300,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 28),
+
+                    // Download button
+                    if (!_isDownloading)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _startDownload,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2196F3),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.download_rounded, size: 22),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Download Database (460 MB)',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    const SizedBox(height: 20),
+
+                    // Feature list
+                    if (!_isDownloading) ...[
+                      _FeatureRow(
+                        icon: Icons.cloud_off_rounded,
+                        text: 'Download once, use offline forever',
+                      ),
+                      const SizedBox(height: 10),
+                      _FeatureRow(
+                        icon: Icons.translate_rounded,
+                        text: '1.4M+ English words + 35K+ Hindi words',
+                      ),
+                      const SizedBox(height: 10),
+                      _FeatureRow(
+                        icon: Icons.wifi_off_rounded,
+                        text: 'No internet needed after download',
+                      ),
+                    ],
+
+                    const SizedBox(height: 40),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
+    );
+  }
+}
+
+class _FeatureRow extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _FeatureRow({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2196F3).withOpacity(0.08),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: const Color(0xFF2196F3)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey.shade500,
+                ),
+          ),
+        ),
+      ],
     );
   }
 }

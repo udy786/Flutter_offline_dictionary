@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/typography.dart';
@@ -28,7 +29,6 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Add to history when viewing
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(historyProvider.notifier).addToHistory(widget.wordId);
     });
@@ -40,61 +40,47 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
     final isFavoriteAsync = ref.watch(watchIsFavoriteProvider(widget.wordId));
 
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          // Favorite button
-          isFavoriteAsync.when(
-            data: (isFavorite) => IconButton(
-              icon: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? AppColors.error : null,
-              ),
-              onPressed: () {
-                ref.read(favoritesProvider.notifier).toggleFavorite(widget.wordId);
-              },
-              tooltip: isFavorite ? 'Remove from favorites' : 'Add to favorites',
-            ),
-            loading: () => const IconButton(
-              icon: Icon(Icons.favorite_border),
-              onPressed: null,
-            ),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-
-          // Share button
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              // TODO: Implement share
-            },
-            tooltip: 'Share',
-          ),
-        ],
-      ),
+      backgroundColor: context.screenBg,
       body: wordAsync.when(
         data: (word) {
           if (word == null) {
-            return const Center(
-              child: Text('Word not found'),
-            );
+            return const Center(child: Text('Word not found'));
           }
-          return _WordDetailContent(word: word);
+          return _WordDetailBody(
+            word: word,
+            isFavoriteAsync: isFavoriteAsync,
+            wordId: widget.wordId,
+          );
         },
         loading: () => const Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: Color(0xFF2196F3)),
         ),
-        error: (error, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 48,
-                color: AppColors.error,
+        error: (error, _) => SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.error_outline_rounded,
+                        size: 36, color: Colors.red.shade400),
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Error loading word',
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Text('$error',
+                      style: TextStyle(color: context.textSecondaryC),
+                      textAlign: TextAlign.center),
+                ],
               ),
-              const SizedBox(height: 16),
-              Text('Error loading word: $error'),
-            ],
+            ),
           ),
         ),
       ),
@@ -102,136 +88,247 @@ class _WordDetailScreenState extends ConsumerState<WordDetailScreen> {
   }
 }
 
-class _WordDetailContent extends ConsumerWidget {
+class _WordDetailBody extends ConsumerWidget {
   final WordEntry word;
+  final AsyncValue<bool> isFavoriteAsync;
+  final int wordId;
 
-  const _WordDetailContent({required this.word});
+  const _WordDetailBody({
+    required this.word,
+    required this.isFavoriteAsync,
+    required this.wordId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final targetLanguage = ref.watch(targetLanguageProvider);
+    final theme = Theme.of(context);
     final isHindi = word.isHindi;
+    final accentColor =
+        isHindi ? const Color(0xFFFF9800) : const Color(0xFF2196F3);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Word header
-          _WordHeader(word: word),
-          const SizedBox(height: 24),
-
-          // Translations
-          if (word.hasTranslationsTo(targetLanguage.code)) ...[
-            TranslationSection(
-              translations: word.getTranslations(targetLanguage.code),
-              targetLanguage: targetLanguage,
+    return CustomScrollView(
+      slivers: [
+        // Header
+        SliverToBoxAdapter(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  accentColor,
+                  accentColor.withOpacity(0.8),
+                ],
+              ),
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(32),
+                bottomRight: Radius.circular(32),
+              ),
             ),
-            const SizedBox(height: 24),
-          ],
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top bar
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.arrow_back_rounded,
+                                color: Colors.white, size: 22),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            // Favorite button
+                            isFavoriteAsync.when(
+                              data: (isFavorite) => GestureDetector(
+                                onTap: () => ref
+                                    .read(favoritesProvider.notifier)
+                                    .toggleFavorite(wordId),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: isFavorite
+                                        ? Colors.white
+                                        : Colors.white.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    isFavorite
+                                        ? Icons.favorite_rounded
+                                        : Icons.favorite_outline_rounded,
+                                    color: isFavorite
+                                        ? Colors.red.shade400
+                                        : Colors.white,
+                                    size: 22,
+                                  ),
+                                ),
+                              ),
+                              loading: () => const SizedBox(width: 42),
+                              error: (_, __) => const SizedBox.shrink(),
+                            ),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () => _shareWord(context, word),
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.share_rounded,
+                                    color: Colors.white, size: 22),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
 
-          // Definitions
-          if (word.definitions.isNotEmpty) ...[
-            DefinitionCard(
-              definitions: word.definitions,
-              pos: word.pos,
-            ),
-            const SizedBox(height: 24),
-          ],
+                    // Language badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        isHindi ? 'Hindi' : 'English',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
 
-          // Examples
-          if (word.examples.isNotEmpty) ...[
-            ExamplesSection(examples: word.examples),
-            const SizedBox(height: 24),
-          ],
+                    // Word
+                    Text(
+                      word.word,
+                      style: (isHindi
+                              ? AppTypography.hindiTitle
+                              : AppTypography.wordTitle)
+                          .copyWith(color: Colors.white),
+                    ),
 
-          // Etymology
-          if (word.etymology != null && word.etymology!.isNotEmpty) ...[
-            _EtymologySection(etymology: word.etymology!),
-            const SizedBox(height: 24),
-          ],
-        ],
-      ),
-    );
-  }
-}
+                    // Pronunciation
+                    if (word.pronunciationIpa != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        '/${word.pronunciationIpa}/',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                    ],
 
-class _WordHeader extends StatelessWidget {
-  final WordEntry word;
-
-  const _WordHeader({required this.word});
-
-  @override
-  Widget build(BuildContext context) {
-    final isHindi = word.isHindi;
-    final badgeColor = isHindi ? AppColors.hindiBadge : AppColors.englishBadge;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Language badge
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: badgeColor.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Text(
-            word.languageCode == 'en' ? 'English' : 'Hindi',
-            style: TextStyle(
-              color: badgeColor,
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
+                    // Part of speech
+                    if (word.pos != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          word.formattedPos,
+                          style: TextStyle(
+                            color: accentColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 8),
 
-        // Word
-        Text(
-          word.word,
-          style: isHindi ? AppTypography.hindiTitle : AppTypography.wordTitle,
-        ),
+        // Content sections
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              // Translations
+              if (word.hasTranslationsTo(targetLanguage.code)) ...[
+                TranslationSection(
+                  translations: word.getTranslations(targetLanguage.code),
+                  targetLanguage: targetLanguage,
+                ),
+                const SizedBox(height: 16),
+              ],
 
-        // Pronunciation
-        if (word.pronunciationIpa != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            '/${word.pronunciationIpa}/',
-            style: AppTypography.pronunciationText,
+              // Definitions
+              if (word.definitions.isNotEmpty) ...[
+                DefinitionCard(
+                  definitions: word.definitions,
+                  pos: word.pos,
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Examples
+              if (word.examples.isNotEmpty) ...[
+                ExamplesSection(examples: word.examples),
+                const SizedBox(height: 16),
+              ],
+
+              // Etymology
+              if (word.etymology != null && word.etymology!.isNotEmpty) ...[
+                _EtymologySection(etymology: word.etymology!),
+              ],
+            ]),
           ),
-        ],
-
-        // Part of speech
-        if (word.pos != null) ...[
-          const SizedBox(height: 8),
-          _PosChip(pos: word.formattedPos),
-        ],
+        ),
       ],
     );
   }
-}
 
-class _PosChip extends StatelessWidget {
-  final String pos;
+  void _shareWord(BuildContext context, WordEntry word) {
+    final buffer = StringBuffer();
+    buffer.writeln('${word.word} (${word.isEnglish ? "English" : "Hindi"})');
 
-  const _PosChip({required this.pos});
+    if (word.pronunciationIpa != null) {
+      buffer.writeln('/${word.pronunciationIpa}/');
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    final color = AppColors.getPosColor(pos);
+    if (word.pos != null) {
+      buffer.writeln('[${word.formattedPos}]');
+    }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        pos,
-        style: AppTypography.posLabel.copyWith(color: color),
-      ),
-    );
+    if (word.definitions.isNotEmpty) {
+      buffer.writeln();
+      for (var i = 0; i < word.definitions.length && i < 3; i++) {
+        buffer.writeln('${i + 1}. ${word.definitions[i]}');
+      }
+    }
+
+    buffer.writeln();
+    buffer.write('— WordBridge Dictionary');
+
+    Share.share(buffer.toString());
   }
 }
 
@@ -242,29 +339,55 @@ class _EtymologySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Etymology',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: context.subtleShadow,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.purple.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.history_edu_rounded,
+                    size: 18, color: Colors.purple.shade400),
               ),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              etymology,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
+              const SizedBox(width: 10),
+              Text(
+                'Etymology',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            etymology,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: context.textSecondaryC,
+              height: 1.6,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

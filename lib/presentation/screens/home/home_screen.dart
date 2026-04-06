@@ -7,9 +7,6 @@ import '../../providers/settings_provider.dart';
 import '../../providers/history_provider.dart';
 import '../../providers/dictionary_providers.dart';
 import '../../widgets/banner_ad_widget.dart';
-import 'widgets/search_bar_widget.dart';
-import 'widgets/recent_searches_widget.dart';
-import 'widgets/language_toggle_widget.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -18,143 +15,41 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // App bar with gradient
-            SliverAppBar(
-              expandedHeight: 140,
-              floating: false,
-              pinned: true,
-              backgroundColor: AppColors.primary,
-              iconTheme: const IconThemeData(color: Colors.white),
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.primary,
-                        AppColors.primary.withOpacity(0.8),
-                      ],
-                    ),
-                  ),
-                  child: SafeArea(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: const Icon(
-                              Icons.menu_book,
-                              color: Colors.white,
-                              size: 36,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'WordBridge – Offline Dictionary',
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              actions: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.favorite_outline, color: Colors.white),
-                    onPressed: () => context.push('/favorites'),
-                    tooltip: 'Favorites',
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.history, color: Colors.white),
-                    onPressed: () => context.push('/history'),
-                    tooltip: 'History',
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.settings_outlined, color: Colors.white),
-                    onPressed: () => context.push('/settings'),
-                    tooltip: 'Settings',
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-            ),
+      backgroundColor: context.screenBg,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top header with gradient
+            _buildHeader(context, ref, theme, size),
 
-            // Content
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  const SizedBox(height: 8),
+            // Body content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 24),
 
                   // Language toggle
-                  const LanguageToggleWidget(),
-                  const SizedBox(height: 24),
+                  _buildLanguageToggle(context, ref, settings),
+                  const SizedBox(height: 28),
 
-                  // Search bar with shadow
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withOpacity(0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: SearchBarWidget(
-                      onTap: () => context.push('/search'),
-                      readOnly: true,
-                      hintText: 'Search for a word...',
-                    ),
-                  ),
-                  const SizedBox(height: 32),
+                  // Quick Actions
+                  _buildQuickActions(context),
+                  const SizedBox(height: 28),
 
                   // Recent searches
-                  const RecentSearchesWidget(),
-                  const SizedBox(height: 24),
+                  _buildRecentSearches(context, ref),
+                  const SizedBox(height: 28),
 
                   // Database stats
-                  const _DatabaseStatsCard(),
-                ]),
+                  _buildDatabaseStats(context, ref),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
           ],
@@ -165,242 +60,599 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
-}
 
-class _DatabaseStatsCard extends ConsumerWidget {
-  const _DatabaseStatsCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(databaseStatsProvider);
-
-    return statsAsync.when(
-      data: (stats) {
-        if (stats.totalWordCount == 0) {
-          return Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeader(
+      BuildContext context, WidgetRef ref, ThemeData theme, Size size) {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF2196F3),
+            Color(0xFF1565C0),
+          ],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top row with title and action buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: AppColors.warning,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
                       Text(
-                        'Database Empty',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        'WordBridge',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'English - Hindi Dictionary',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withOpacity(0.8),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Run the data processing scripts to populate the dictionary database.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                  Row(
+                    children: [
+                      _HeaderIconButton(
+                        icon: Icons.favorite_outline,
+                        onTap: () => context.push('/favorites'),
+                      ),
+                      const SizedBox(width: 8),
+                      const SizedBox(width: 8),
+                      _HeaderIconButton(
+                        icon: Icons.settings_outlined,
+                        onTap: () => context.push('/settings'),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ),
-          );
-        }
+              const SizedBox(height: 24),
 
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.primary.withOpacity(0.05),
-                AppColors.primary.withOpacity(0.02),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: AppColors.primary.withOpacity(0.1),
-              width: 1,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+              // Search bar
+              GestureDetector(
+                onTap: () => context.push('/search'),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: context.cardBg,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
                       ),
-                      child: Icon(
-                        Icons.auto_stories,
-                        color: AppColors.primary,
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.search_rounded,
+                        color: Colors.grey.shade400,
                         size: 24,
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Dictionary Database',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _StatCard(
-                        label: 'English',
-                        value: _formatNumber(stats.englishWordCount),
-                        color: AppColors.englishBadge,
-                        icon: Icons.translate,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _StatCard(
-                        label: 'Hindi',
-                        value: _formatNumber(stats.hindiWordCount),
-                        color: AppColors.hindiBadge,
-                        icon: Icons.language,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _StatCard(
-                        label: 'Total',
-                        value: _formatNumber(stats.totalWordCount),
-                        color: AppColors.primary,
-                        icon: Icons.collections_bookmark,
-                      ),
-                    ),
-                  ],
-                ),
-                if (stats.version != null) ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          size: 14,
-                          color: AppColors.primary,
+                      const SizedBox(width: 12),
+                      Text(
+                        'Search for a word...',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: Colors.grey.shade400,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Version: ${stats.version}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2196F3).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ],
-                    ),
+                        child: const Icon(
+                          Icons.mic_none_rounded,
+                          color: Color(0xFF2196F3),
+                          size: 18,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ],
-            ),
+                ),
+              ),
+            ],
           ),
-        );
-      },
-      loading: () => const Card(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-      ),
-      error: (error, _) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text('Error loading stats: $error'),
         ),
       ),
     );
   }
 
+  Widget _buildLanguageToggle(
+      BuildContext context, WidgetRef ref, AppSettings settings) {
+    final languagePair = settings.languagePair;
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: context.subtleShadow,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Source language
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2196F3).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'FROM',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: const Color(0xFF2196F3),
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.2,
+                      fontSize: 10,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    languagePair.source.nativeName,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF2196F3),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Swap button
+          GestureDetector(
+            onTap: () => ref.read(settingsProvider.notifier).swapLanguages(),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2196F3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.swap_horiz_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+          ),
+
+          // Target language
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF9800).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'TO',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: const Color(0xFFFF9800),
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.2,
+                      fontSize: 10,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    languagePair.target.nativeName,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFFFF9800),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
+    return Row(
+      children: [
+        _QuickActionCard(
+          icon: Icons.history_rounded,
+          label: 'History',
+          color: const Color(0xFF00BCD4),
+          onTap: () => context.push('/history'),
+        ),
+        const SizedBox(width: 12),
+        _QuickActionCard(
+          icon: Icons.favorite_rounded,
+          label: 'Favorites',
+          color: const Color(0xFFE91E63),
+          onTap: () => context.push('/favorites'),
+        ),
+        const SizedBox(width: 12),
+        _QuickActionCard(
+          icon: Icons.auto_stories_rounded,
+          label: 'Browse',
+          color: const Color(0xFF4CAF50),
+          onTap: () => context.push('/search'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentSearches(BuildContext context, WidgetRef ref) {
+    final recentAsync = ref.watch(recentSearchesProvider);
+    final theme = Theme.of(context);
+
+    return recentAsync.when(
+      data: (recent) {
+        if (recent.isEmpty) {
+          return _buildEmptyRecent(context, theme);
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent Searches',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => context.push('/history'),
+                  child: Text(
+                    'See all',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF2196F3),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              height: 48,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: recent.take(10).length,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, index) {
+                  final word = recent.elementAt(index);
+                  final isEnglish = word.isEnglish;
+                  final color = isEnglish
+                      ? const Color(0xFF2196F3)
+                      : const Color(0xFFFF9800);
+
+                  return GestureDetector(
+                    onTap: () => context.push('/word/${word.id}'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: context.cardBg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: color.withOpacity(0.2),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: color.withOpacity(0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            word.word,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: context.textPrimaryC,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildEmptyRecent(BuildContext context, ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: context.cardBg,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: context.subtleShadow,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.search_rounded,
+            size: 40,
+            color: Colors.grey.shade300,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Start searching',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: context.textSecondaryC,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Your recent searches will appear here',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: Colors.grey.shade400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDatabaseStats(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(databaseStatsProvider);
+    final theme = Theme.of(context);
+
+    return statsAsync.when(
+      data: (stats) {
+        if (stats.totalWordCount == 0) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Dictionary Stats',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: context.cardBg,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: context.subtleShadow,
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  _StatItem(
+                    value: _formatNumber(stats.englishWordCount),
+                    label: 'English',
+                    icon: Icons.translate_rounded,
+                    color: const Color(0xFF2196F3),
+                  ),
+                  _buildStatDivider(context),
+                  _StatItem(
+                    value: _formatNumber(stats.hindiWordCount),
+                    label: 'Hindi',
+                    icon: Icons.language_rounded,
+                    color: const Color(0xFFFF9800),
+                  ),
+                  _buildStatDivider(context),
+                  _StatItem(
+                    value: _formatNumber(stats.totalWordCount),
+                    label: 'Total',
+                    icon: Icons.collections_bookmark_rounded,
+                    color: const Color(0xFF4CAF50),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildStatDivider(BuildContext context) {
+    return Container(
+      height: 40,
+      width: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      color: context.dividerC,
+    );
+  }
+
   String _formatNumber(int number) {
     if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
+      return '${(number / 1000000).toStringAsFixed(1)}M+';
     } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
+      return '${(number / 1000).toStringAsFixed(1)}K+';
     }
     return number.toString();
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
+class _HeaderIconButton extends StatelessWidget {
   final IconData icon;
+  final VoidCallback onTap;
 
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.color,
+  const _HeaderIconButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: Colors.white, size: 22),
+      ),
+    );
+  }
+}
+
+class _QuickActionCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _QuickActionCard({
     required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          decoration: BoxDecoration(
+            color: context.cardBg,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: context.textPrimaryC,
+                    ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  final String value;
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  const _StatItem({
+    required this.value,
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 28,
-          ),
+          Icon(icon, color: color, size: 22),
           const SizedBox(height: 8),
           Text(
             value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: color,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: context.textPrimaryC,
                 ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
+                  color: context.textSecondaryC,
                 ),
           ),
         ],
